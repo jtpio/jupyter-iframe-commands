@@ -40,6 +40,7 @@ exclude = [".github", "binder"]
 "jupyter_iframe_commands/labextension" = "share/jupyter/labextensions/jupyter-iframe-commands"
 "install.json" = "share/jupyter/labextensions/jupyter-iframe-commands/install.json"
 
+
 [tool.hatch.build.hooks.version]
 path = "jupyter_iframe_commands/_version.py"
 
@@ -67,7 +68,7 @@ version_cmd = "hatch version"
 
 [tool.jupyter-releaser.hooks]
 before-build-npm = [
-    "python -m pip install 'jupyterlab>=4.0.0,<5'",
+    "python -m pip install 'jupyterlab==4.2.6'",
     "jlpm",
     "jlpm build:prod"
 ]
