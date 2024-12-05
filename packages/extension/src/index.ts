@@ -5,12 +5,9 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { expose, windowEndpoint } from 'comlink';
-
-import { CommandBridge } from 'jupyter-iframe-commands-host';
 
 /**
  * A plugin to expose an API for interacting with JupyterLab from a parent page.
@@ -26,6 +23,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null
   ) => {
     console.log('JupyterLab extension jupyter-iframe-commands is activated!');
+    const { commands } = app;
 
     if (settingRegistry) {
       settingRegistry
@@ -44,8 +42,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
     }
 
-    const { commands } = app;
-    const api = new CommandBridge('jupyterlab', { commands });
+    const api = {
+      execute(command: string, args: ReadonlyPartialJSONObject) {
+        commands.execute(command, args);
+      },
+      listCommands() {
+        return commands.listCommands();
+      }
+    };
+
     const endpoint = windowEndpoint(self.parent);
     expose(api, endpoint);
   }
