@@ -2,8 +2,7 @@
 /* eslint-disable no-undef */
 import { CommandBridge } from 'jupyter-iframe-commands-host';
 
-const commandBridge = new CommandBridge({ iframeId: 'jupyterlab' })
-  .commandBridge;
+const commandBridge = new CommandBridge({ iframeId: 'jupyterlab' });
 
 // Create and append dialogs to the document
 const instructionsDialog = document.createElement('dialog');
