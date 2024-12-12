@@ -1,27 +1,99 @@
 # jupyter-iframe-commands
 
 [![Github Actions Status](https://github.com/TileDB-Inc/jupyter-iframe-commands/workflows/Build/badge.svg)](https://github.com/TileDB-Inc/jupyter-iframe-commands/actions/workflows/build.yml)
+[![lite-badge](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://tiledb-inc.github.io/jupyter-iframe-commands/)
 
-A JupyterLab extension to facilitate integration with a host page via an IFrame
+A JupyterLab extension to facilitate integration with a host page via an iframe
 
 > [!WARNING]
 > This project is still in an early development stage.
 
 ## Requirements
 
-- JupyterLab >= 4.0.0
+- JupyterLab >= 4.0.0 or Jupyter Notebook >= 7.0.0
 
-## Install
+### Try it in your browser
 
-To install the extension
+Try out the extension in your browser:
 
-- Clone the repo to your local environment
-- Change directory to the `jupyter-iframe-commands` directory
-- execute: `pip install .`
+[![lite-badge](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://tiledb-inc.github.io/jupyter-iframe-commands/)
 
 ## Usage
 
-Try out a preview [here](https://tiledb-inc.github.io/jupyter-iframe-commands/)
+This repository provides two packages:
+
+- The extension package: `jupyter-iframe-commands`. This is the JupyterLab extension that provides the API to execute JupyterLab commands from a host page.
+- The host package: `jupyter-iframe-commands-host`. This is a package that provides a bridge to communicate with JupyterLab running in an iframe.
+
+### Host Package
+
+The host package provides a bridge to communicate with JupyterLab running in an iframe. To use it in your application:
+
+1. Install the package:
+
+```bash
+npm install jupyter-iframe-commands-host
+```
+
+2. Import and use the `CommandBridge`:
+
+```typescript
+import { CommandBridge } from 'jupyter-iframe-commands-host';
+
+// Initialize the bridge with your iframe ID
+const bridge = new CommandBridge({
+  iframeId: 'your-jupyter-iframe-id'
+});
+
+// Execute JupyterLab commands
+// Example: Toggle the left sidebar
+await bridge.commandBridge.execute('application:toggle-left-area');
+
+// Example: Change the theme
+await bridge.commandBridge.execute('apputils:change-theme', {
+  theme: 'JupyterLab Dark'
+});
+
+// List available JupyterLab commands
+const commands = await bridge.commandBridge.listCommands();
+console.log(commands);
+```
+
+### Extension Package
+
+The JupyterLab extension should be installed in the JupyterLab environment running in the iframe.
+
+To install the extension:
+
+```bash
+pip install jupyter-iframe-commands
+```
+
+### Customizing the user interface
+
+The Jupyter UI can be customized in different ways.
+
+#### Example
+
+On the following screenshot:
+
+- `@jupyterlab/mainmenu-extension` is disabled to remove the menu entries
+- `@jupyter-notebook/lab-extension` is disabled to remove the interface switcher from the notebook toolbar
+- The `visible` property of the `@jupyter-notebook/application-extension:top` plugin is set to `no`, to hide the top bar
+
+![a screenshot showing Jupyter Notebook running in an iframe](https://github.com/user-attachments/assets/cf4a64c0-9a2c-4614-93da-e1a2467711d9)
+
+For the demo in this repo, this configuration is provided via two files:
+
+- `overrides.json`: This file is used to override the default settings of the JupyterLab and Jupyter Notebook applications
+- `jupyter-lite.json`: This file is used to set a list of `disabledExtensions`, which can be used to disabled invidual plugins
+
+#### Configuring JupyterLab
+
+JupyterLab can be configured in a smilar way, using well-known files at specific locations:
+
+- `page_config.json`: https://jupyterlab.readthedocs.io/en/latest/user/directories.html#labconfig-directories
+- `overrides.json`: https://jupyterlab.readthedocs.io/en/latest/user/directories.html#overridesjson
 
 ### Available Commands
 
@@ -55,11 +127,19 @@ Examples of commands with arguments:
 
 To run the demo on a local Jupyter Lab instance:
 
-- Follow the [development install instructions](#development-install)
-- `cd demo`
-- Run: `jlpm start:lab`
-- In another terminal
-- Run: `jlpm start:local`
+1. Follow the [development install instructions](#development-install)
+2. `cd demo`
+3. Start JupyterLab:
+
+```bash
+jlpm start:lab
+```
+
+4. In another terminal, start the demo app:
+
+```bash
+jlpm start:local
+```
 
 Open http://localhost:8080 in your browser.
 
@@ -67,10 +147,17 @@ Open http://localhost:8080 in your browser.
 
 To run the demo on a Jupyter Lite instance:
 
-- Follow the [development install instructions](#development-install)
-- Run: `jlpm build:lite`
-- `cd demo`
-- Run: `jlpm start:lite`
+1. Follow the [development install instructions](#development-install)
+2. `cd demo`
+3. Build and start the demo app:
+
+```bash
+# Build the demo
+jlpm build:ghpages
+
+# Start the development server
+jlpm start:lite
+```
 
 ## Uninstall
 
