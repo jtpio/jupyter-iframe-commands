@@ -8,6 +8,7 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { expose, windowEndpoint } from 'comlink';
+import { ICommandBridgeRemote } from './interface';
 
 /**
  * A plugin to expose an API for interacting with JupyterLab from a parent page.
@@ -42,9 +43,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
     }
 
-    const api = {
-      execute(command: string, args: ReadonlyPartialJSONObject) {
-        commands.execute(command, args);
+    const api: ICommandBridgeRemote = {
+      async execute(command: string, args: ReadonlyPartialJSONObject) {
+        await commands.execute(command, args);
       },
       listCommands() {
         return commands.listCommands();
@@ -57,3 +58,4 @@ const plugin: JupyterFrontEndPlugin<void> = {
 };
 
 export default plugin;
+export * from './interface';

@@ -1,9 +1,17 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable no-undef */
-import { CommandBridge } from 'jupyter-iframe-commands-host';
+import { createBridge } from 'jupyter-iframe-commands-host';
 
-const commandBridge = new CommandBridge({ iframeId: 'jupyterlab' })
-  .commandBridge;
+const commandBridge = createBridge({ iframeId: 'jupyterlab' });
+
+const submitCommand = async (command, args) => {
+  try {
+    await commandBridge.execute(command, args ? JSON.parse(args) : {});
+  } catch (e) {
+    document.getElementById('error-dialog').innerHTML = `<code>${e}</code>`;
+    errorDialog.showModal();
+  }
+};
 
 // Create and append dialogs to the document
 const instructionsDialog = document.createElement('dialog');
@@ -12,7 +20,7 @@ instructionsDialog.innerHTML = `
     <div>
       <h2 style="margin-top: 0;">Instructions</h2>
       <p>To use this demo simply enter a command in the command input and any arguments for that command in the args input.</p>
-      <p>Click the <code style="background-color: lightsteelblue;">List Commands</code> button to see a list of available commands.</p>
+      <p>Click the <code style="background-color: lightsteelblue;">List Available Commands</code> button to see a list of available commands.</p>
       <div style="display: flex; gap: 0.4rem; flex-direction: column; text-align: left; font-size: 0.9rem;">
         <p style="font-weight: bold; padding: 0;">Some commands are listed here for convenience:</p>
         <div class="command-example">
@@ -69,8 +77,20 @@ listCommandsDialog.innerHTML = `
   </form>
 `;
 
+const errorDialog = document.createElement('dialog');
+errorDialog.innerHTML = `
+  <form method="dialog">
+    <h2 style="margin: 0; color: #ED4337;">⚠ Error</h2>
+    <div id="error-dialog"></div>
+    <div class="dialog-buttons">
+      <button value="close">Close</button>
+    </div>
+  </form>
+`;
+
 document.body.appendChild(instructionsDialog);
 document.body.appendChild(listCommandsDialog);
+document.body.appendChild(errorDialog);
 
 document.getElementById('instructions').addEventListener('click', () => {
   instructionsDialog.showModal();
@@ -78,7 +98,7 @@ document.getElementById('instructions').addEventListener('click', () => {
 
 document
   .getElementById('command-select-submit')
-  .addEventListener('click', e => {
+  .addEventListener('click', async e => {
     e.preventDefault();
     const select = document.getElementById('command-select');
     let command = select.value;
@@ -89,7 +109,7 @@ document
         args = `{"theme": "${command}"}`;
         command = 'apputils:change-theme';
       }
-      commandBridge.execute(command, args ? JSON.parse(args) : {});
+      await submitCommand(command, args);
     }
     instructionsDialog.close();
   });
@@ -103,7 +123,7 @@ document.getElementById('list-commands').addEventListener('click', async () => {
   listCommandsDialog.showModal();
 });
 
-document.getElementById('commands').addEventListener('submit', e => {
+document.getElementById('commands').addEventListener('submit', async e => {
   e.preventDefault();
   const command = document.querySelector('input[name="command"]').value;
 
@@ -111,7 +131,8 @@ document.getElementById('commands').addEventListener('submit', e => {
   const args = document
     .querySelector('input[name="args"]')
     .value.replace(/'/g, '"');
-  commandBridge.execute(command, args ? JSON.parse(args) : {});
+
+  await submitCommand(command, args);
 });
 
 // Handle mode toggle
