@@ -40,6 +40,12 @@ jobs:
 
           jupyter labextension list 2>&1 | grep -ie "jupyter-iframe-commands.*OK"
 
+      - name: Build the npm packages
+        run: |
+          set -eux
+
+          jlpm build:npm:dist
+
       - name: Package the extension
         run: |
           set -eux
@@ -52,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: extension-artifacts
-          path: dist/jupyter_iframe_commands*
+          path: dist/*
           if-no-files-found: error
 
   test_isolated:
