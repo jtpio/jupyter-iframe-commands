@@ -45,15 +45,29 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const api: ICommandBridgeRemote = {
       async execute(command: string, args: ReadonlyPartialJSONObject) {
-        await commands.execute(command, args);
+        const result = await commands.execute(command, args);
+        try {
+          // Attempt to clone result to check if it's serializable
+          const clone = structuredClone(result);
+          return clone;
+        } catch (error) {
+          // Non-serializable values can't be sent over Comlink
+          void error;
+        }
       },
-      listCommands() {
+      async listCommands() {
         return commands.listCommands();
+      },
+      get ready() {
+        return app.started;
       }
     };
 
-    const endpoint = windowEndpoint(self.parent);
-    expose(api, endpoint);
+    app.started.then(() => {
+      const endpoint = windowEndpoint(self.parent);
+      expose(api, endpoint);
+      window.parent?.postMessage('extension-loaded', '*');
+    });
   }
 };
 
